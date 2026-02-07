@@ -82,15 +82,16 @@ const benefits: { icon: ReactNode; title: string; description: string }[] = [
 export default function BenefitsSection() {
   return (
     <section className="flex flex-col items-center gap-8">
-      <h3 className="font-heading text-2xl sm:text-3xl font-semibold text-center">
+      <h3 className="font-heading text-2xl sm:text-3xl font-semibold text-center animate-[fade-in_0.4s_ease-out_both]">
         What You&apos;ll Get
       </h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-        {benefits.map((benefit) => (
+        {benefits.map((benefit, i) => (
           <div
             key={benefit.title}
-            className="bg-slate-card border border-white/10 rounded-xl p-5 transition-shadow hover:shadow-[0_0_20px_rgba(196,242,73,0.1)]"
+            className="bg-slate-card border border-white/10 rounded-2xl p-5 transition-shadow hover:shadow-[0_0_20px_rgba(196,242,73,0.1)] animate-[fade-in_0.4s_ease-out_both]"
+            style={{ animationDelay: `${(i + 1) * 100}ms` }}
           >
             <div className="w-10 h-10 rounded-full bg-lime/10 flex items-center justify-center">
               {benefit.icon}

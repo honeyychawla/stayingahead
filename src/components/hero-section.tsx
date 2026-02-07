@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function HeroSection() {
   return (
     <section className="flex flex-col items-center text-center gap-5">
@@ -31,10 +33,13 @@ export default function HeroSection() {
 
       {/* Founder */}
       <div className="flex items-center gap-2.5 animate-[fade-in_0.5s_ease-out_0.4s_both]">
-        <img
+        <Image
           src="/vaibhav.png"
           alt="Vaibhav Sisinty"
-          className="w-10 h-10 rounded-lg object-cover shrink-0 border border-white/10"
+          width={40}
+          height={40}
+          priority
+          className="rounded-lg object-cover shrink-0 border border-white/10"
         />
         <div className="text-left">
           <p className="text-white text-sm font-medium leading-tight">

@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   title: "Staying Ahead | Join the Free AI Updates Community",
   description:
     "Get curated AI updates, resources, and session invites. Join 10,000+ AI enthusiasts on WhatsApp. Free forever.",
+  alternates: {
+    canonical: "https://stayingahead.in",
+  },
   openGraph: {
     title: "Staying Ahead | Join the Free AI Updates Community",
     description:
@@ -35,6 +38,26 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      name: "Staying Ahead",
+      url: "https://stayingahead.in",
+      description:
+        "Get curated AI updates, resources, and session invites. Join 10,000+ AI enthusiasts on WhatsApp. Free forever.",
+    },
+    {
+      "@type": "Organization",
+      name: "Staying Ahead",
+      url: "https://stayingahead.in",
+      description:
+        "Free AI community delivering curated updates, resources, and live sessions via WhatsApp.",
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -42,6 +65,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         className={`${inter.variable} ${playfair.variable} font-body antialiased min-h-screen`}
       >

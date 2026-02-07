@@ -298,6 +298,7 @@ export default function LeadForm() {
       <form
         onSubmit={handleSubmit}
         noValidate
+        aria-busy={loading}
         className="bg-slate-card border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_0_30px_rgba(196,242,73,0.08)] flex flex-col gap-4"
       >
         <fieldset

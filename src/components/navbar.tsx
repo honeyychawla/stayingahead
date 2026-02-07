@@ -6,12 +6,13 @@ export default function Navbar() {
       <div className="max-w-2xl mx-auto px-3 sm:px-4 pt-3">
         <div className="bg-slate-card/80 backdrop-blur-md border border-white/10 rounded-2xl px-4 sm:px-6 h-12 sm:h-14 flex items-center justify-between">
           {/* Brand */}
-          <a
-            href="#"
-            className="font-heading text-base sm:text-lg font-bold text-white whitespace-nowrap shrink-0"
+          <button
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="font-heading text-base sm:text-lg font-bold text-white whitespace-nowrap shrink-0 cursor-pointer"
           >
             Staying Ahead
-          </a>
+          </button>
 
           {/* CTA */}
           <button

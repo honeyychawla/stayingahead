@@ -18,6 +18,8 @@ interface IpApiResponse {
   country_calling_code: string;
 }
 
+const GEO_TIMEOUT_MS = 5000;
+
 export function useGeo(): GeoResult {
   const [result, setResult] = useState<GeoResult>({
     country: "",
@@ -29,7 +31,10 @@ export function useGeo(): GeoResult {
   });
 
   useEffect(() => {
-    fetch("https://ipapi.co/json/")
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), GEO_TIMEOUT_MS);
+
+    fetch("https://ipapi.co/json/", { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error("Geo fetch failed");
         return res.json();
@@ -46,7 +51,15 @@ export function useGeo(): GeoResult {
       })
       .catch(() => {
         setResult((prev) => ({ ...prev, loaded: true, error: true }));
+      })
+      .finally(() => {
+        clearTimeout(timeoutId);
       });
+
+    return () => {
+      controller.abort();
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   return result;
