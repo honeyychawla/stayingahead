@@ -47,24 +47,33 @@ body::after {
   background-size: 200px 200px;
 }
 
-/* Dark select/option styling */
-select option {
-  background: #1A1A1A;
-  color: #ffffff;
-  padding: 8px;
+/* Custom scrollbar for dropdown menus */
+.dropdown-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 242, 73, 0.2) transparent;
 }
 
-select option:checked,
-select option:hover {
-  background: #C4F249;
-  color: #000000;
+.dropdown-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dropdown-scroll::-webkit-scrollbar-thumb {
+  background: rgba(196, 242, 73, 0.2);
+  border-radius: 3px;
+}
+
+.dropdown-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(196, 242, 73, 0.35);
 }
 
 /* Remove autofill background flash */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-select:-webkit-autofill {
+input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0px 1000px #1A1A1A inset;
   -webkit-text-fill-color: #ffffff;
   caret-color: #ffffff;

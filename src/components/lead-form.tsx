@@ -317,6 +317,19 @@ export default function LeadForm() {
         aria-busy={loading}
         className="bg-slate-card border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_0_30px_rgba(196,242,73,0.08)] flex flex-col gap-4"
       >
+        {/* Mobile backdrop when dropdown is open */}
+        {(countryOpen || dialCodeOpen || experienceOpen) && (
+          <div
+            className="fixed inset-0 bg-black/40 z-[65] sm:hidden"
+            onClick={() => {
+              setCountryOpen(false);
+              setDialCodeOpen(false);
+              setExperienceOpen(false);
+            }}
+            aria-hidden="true"
+          />
+        )}
+
         <fieldset
           disabled={loading}
           className={`flex flex-col gap-4 ${loading ? "opacity-60" : "opacity-100"} transition-opacity duration-300`}
@@ -378,7 +391,7 @@ export default function LeadForm() {
                   aria-expanded={countryOpen}
                   aria-haspopup="listbox"
                   aria-labelledby="country-label"
-                  className={`${selectClasses} w-full text-left flex items-center justify-between cursor-pointer`}
+                  className={`${selectClasses} w-full text-left flex items-center justify-between cursor-pointer ${countryOpen ? "border-lime/30" : ""}`}
                 >
                   <span className="text-sm">{country || "Select country"}</span>
                   <svg
@@ -399,7 +412,7 @@ export default function LeadForm() {
                   <div
                     role="listbox"
                     aria-label="Country options"
-                    className="absolute z-[70] left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-slate-card border border-white/10 rounded-lg py-1 shadow-lg"
+                    className="absolute z-[70] left-0 right-0 mt-1 max-h-[min(15rem,40vh)] overflow-y-auto bg-slate-card border border-white/10 rounded-lg py-1 shadow-[0_8px_30px_rgba(0,0,0,0.5)] dropdown-scroll"
                   >
                     {COUNTRIES.map((c) => (
                       <button
@@ -454,7 +467,7 @@ export default function LeadForm() {
                   onClick={() => setDialCodeOpen(!dialCodeOpen)}
                   aria-expanded={dialCodeOpen}
                   aria-haspopup="listbox"
-                  className={`${selectClasses} w-28 text-left flex items-center justify-between cursor-pointer`}
+                  className={`${selectClasses} w-28 text-left flex items-center justify-between cursor-pointer ${dialCodeOpen ? "border-lime/30" : ""}`}
                 >
                   <span className="text-sm">{dialCode} {countryCode || "IN"}</span>
                   <svg
@@ -475,7 +488,7 @@ export default function LeadForm() {
                   <div
                     role="listbox"
                     aria-label="Country calling code options"
-                    className="absolute z-[70] left-0 mt-1 w-56 max-h-60 overflow-y-auto bg-slate-card border border-white/10 rounded-lg py-1 shadow-lg"
+                    className="absolute z-[70] left-0 mt-1 w-56 max-h-[min(15rem,40vh)] overflow-y-auto bg-slate-card border border-white/10 rounded-lg py-1 shadow-[0_8px_30px_rgba(0,0,0,0.5)] dropdown-scroll"
                   >
                     {COUNTRIES.map((c) => (
                       <button
@@ -537,7 +550,7 @@ export default function LeadForm() {
                 aria-invalid={!!fieldErrors.experience}
                 className={`${selectClasses} w-full text-left flex items-center justify-between cursor-pointer ${
                   !experience ? "text-secondary/60" : ""
-                } ${fieldErrors.experience ? "border-red-400/50" : ""}`}
+                } ${fieldErrors.experience ? "border-red-400/50" : ""} ${experienceOpen ? "border-lime/30" : ""}`}
               >
                 <span className="flex items-center gap-2">
                   {experience || "Work experience"}
@@ -574,7 +587,7 @@ export default function LeadForm() {
                 <div
                   role="listbox"
                   aria-label="Work experience options"
-                  className="absolute z-[70] left-0 right-0 mt-1 bg-slate-card border border-white/10 rounded-lg py-1 shadow-lg"
+                  className="absolute z-[70] left-0 right-0 mt-1 bg-slate-card border border-white/10 rounded-lg py-1 shadow-[0_8px_30px_rgba(0,0,0,0.5)] dropdown-scroll"
                 >
                   {EXPERIENCE_OPTIONS.map((opt) => (
                     <button
