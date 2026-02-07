@@ -50,8 +50,10 @@ export default function LeadForm() {
   const [countryEditable, setCountryEditable] = useState(false);
   const [experienceOpen, setExperienceOpen] = useState(false);
   const [dialCodeOpen, setDialCodeOpen] = useState(false);
+  const [countryOpen, setCountryOpen] = useState(false);
   const experienceRef = useRef<HTMLDivElement>(null);
   const dialCodeRef = useRef<HTMLDivElement>(null);
+  const countryRef = useRef<HTMLDivElement>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -114,6 +116,20 @@ export default function LeadForm() {
         !dialCodeRef.current.contains(e.target as Node)
       ) {
         setDialCodeOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Close country dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        countryRef.current &&
+        !countryRef.current.contains(e.target as Node)
+      ) {
+        setCountryOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -355,24 +371,56 @@ export default function LeadForm() {
                 <div className="h-4 w-full max-w-[160px] bg-gray-700 rounded animate-pulse" />
               </div>
             ) : countryEditable ? (
-              <>
-                <label htmlFor="country-select" className="sr-only">
-                  Select country
-                </label>
-                <select
-                  id="country-select"
-                  value={countryCode}
-                  onChange={(e) => handleCountryChange(e.target.value)}
+              <div ref={countryRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setCountryOpen(!countryOpen)}
+                  aria-expanded={countryOpen}
+                  aria-haspopup="listbox"
                   aria-labelledby="country-label"
-                  className={`${selectClasses} w-full`}
+                  className={`${selectClasses} w-full text-left flex items-center justify-between cursor-pointer`}
                 >
-                  {COUNTRIES.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </>
+                  <span className="text-sm">{country || "Select country"}</span>
+                  <svg
+                    className={`w-4 h-4 text-secondary transition-transform ${countryOpen ? "rotate-180" : ""}`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+
+                {countryOpen && (
+                  <div
+                    role="listbox"
+                    aria-label="Country options"
+                    className="absolute z-[70] left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-slate-card border border-white/10 rounded-lg py-1 shadow-lg"
+                  >
+                    {COUNTRIES.map((c) => (
+                      <button
+                        key={c.code}
+                        type="button"
+                        role="option"
+                        aria-selected={countryCode === c.code}
+                        onClick={() => {
+                          handleCountryChange(c.code);
+                          setCountryOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer hover:bg-lime hover:text-black ${
+                          countryCode === c.code ? "text-lime" : "text-white"
+                        }`}
+                      >
+                        {c.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="w-full bg-slate-card border border-white/10 rounded-lg px-4 py-3 h-12 flex items-center justify-between">
                 <span className="text-white text-sm flex items-center gap-1.5">
@@ -472,81 +520,82 @@ export default function LeadForm() {
 
           {/* Work Experience - Custom Dropdown */}
           <div
-            ref={experienceRef}
-            className="relative animate-[fade-in_0.4s_ease-out_both]"
+            className="animate-[fade-in_0.4s_ease-out_both]"
             style={{ animationDelay: "240ms" }}
           >
-            <label htmlFor="experience-btn" className="sr-only">
-              Work experience
-            </label>
-            <button
-              id="experience-btn"
-              type="button"
-              onClick={() => setExperienceOpen(!experienceOpen)}
-              aria-expanded={experienceOpen}
-              aria-haspopup="listbox"
-              aria-describedby="experience-error"
-              aria-invalid={!!fieldErrors.experience}
-              className={`${selectClasses} w-full text-left flex items-center justify-between cursor-pointer ${
-                !experience ? "text-secondary/60" : ""
-              } ${fieldErrors.experience ? "border-red-400/50" : ""}`}
-            >
-              <span className="flex items-center gap-2">
-                {experience || "Work experience"}
-                {experience && isFieldValid("experience") && (
-                  <svg
-                    className="w-4 h-4 text-lime shrink-0"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </span>
-              <svg
-                className={`w-4 h-4 text-secondary transition-transform ${experienceOpen ? "rotate-180" : ""}`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
+            <div ref={experienceRef} className="relative">
+              <label htmlFor="experience-btn" className="sr-only">
+                Work experience
+              </label>
+              <button
+                id="experience-btn"
+                type="button"
+                onClick={() => setExperienceOpen(!experienceOpen)}
+                aria-expanded={experienceOpen}
+                aria-haspopup="listbox"
+                aria-describedby="experience-error"
+                aria-invalid={!!fieldErrors.experience}
+                className={`${selectClasses} w-full text-left flex items-center justify-between cursor-pointer ${
+                  !experience ? "text-secondary/60" : ""
+                } ${fieldErrors.experience ? "border-red-400/50" : ""}`}
               >
-                <path d="M6 9l6 6 6-6" />
-              </svg>
-            </button>
+                <span className="flex items-center gap-2">
+                  {experience || "Work experience"}
+                  {experience && isFieldValid("experience") && (
+                    <svg
+                      className="w-4 h-4 text-lime shrink-0"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={3}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </span>
+                <svg
+                  className={`w-4 h-4 text-secondary transition-transform ${experienceOpen ? "rotate-180" : ""}`}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
 
-            {experienceOpen && (
-              <div
-                role="listbox"
-                aria-label="Work experience options"
-                className="absolute z-[70] left-0 right-0 mt-1 bg-slate-card border border-white/10 rounded-lg py-1 shadow-lg"
-              >
-                {EXPERIENCE_OPTIONS.map((opt) => (
-                  <button
-                    key={opt}
-                    type="button"
-                    role="option"
-                    aria-selected={experience === opt}
-                    onClick={() => {
-                      setExperience(opt);
-                      setExperienceOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer hover:bg-lime hover:text-black ${
-                      experience === opt ? "text-lime" : "text-white"
-                    }`}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            )}
+              {experienceOpen && (
+                <div
+                  role="listbox"
+                  aria-label="Work experience options"
+                  className="absolute z-[70] left-0 right-0 mt-1 bg-slate-card border border-white/10 rounded-lg py-1 shadow-lg"
+                >
+                  {EXPERIENCE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      role="option"
+                      aria-selected={experience === opt}
+                      onClick={() => {
+                        setExperience(opt);
+                        setExperienceOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer hover:bg-lime hover:text-black ${
+                        experience === opt ? "text-lime" : "text-white"
+                      }`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <FieldError id="experience-error" message={fieldErrors.experience} />
           </div>
 
