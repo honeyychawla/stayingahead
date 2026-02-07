@@ -1,8 +1,8 @@
 export default function HeroSection() {
   return (
-    <section className="flex flex-col items-center text-center gap-6">
-      <span className="inline-block bg-slate-card border border-gray-700 text-lime text-sm font-medium rounded-full px-4 py-1.5 animate-[fade-in_0.5s_ease-out]">
-        Free &middot; Built for AI Enthusiasts
+    <section className="flex flex-col items-center text-center gap-5">
+      <span className="inline-block bg-white/5 border border-white/10 text-lime text-sm font-medium rounded-full px-4 py-1.5 animate-[fade-in_0.5s_ease-out]">
+        Free &middot; WhatsApp Community
       </span>
 
       <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight animate-[fade-in_0.5s_ease-out_0.1s_both]">
@@ -13,9 +13,9 @@ export default function HeroSection() {
         Your unfair advantage in AI.
       </h2>
 
-      <p className="text-secondary text-base sm:text-lg max-w-md leading-relaxed animate-[fade-in_0.5s_ease-out_0.3s_both]">
-        While others scroll through noise, you get the signal.
-        Curated AI updates, tools, and sessions delivered straight to{" "}
+      <p className="text-secondary text-base sm:text-lg max-w-sm leading-relaxed animate-[fade-in_0.5s_ease-out_0.3s_both]">
+        Skip the noise. Get the signal. AI updates, tools, and live sessions
+        straight to{" "}
         <span className="inline-flex items-center gap-1 text-white/90">
           <svg
             className="w-4 h-4 sm:w-5 sm:h-5 text-lime inline"
@@ -30,22 +30,34 @@ export default function HeroSection() {
       </p>
 
       {/* Founder */}
-      <div className="flex items-center gap-3 animate-[fade-in_0.5s_ease-out_0.4s_both]">
-        <span className="text-xs text-secondary/60">Curated by</span>
-        <span className="w-px h-4 bg-white/10" aria-hidden="true" />
-        <div className="flex items-center gap-2">
-          <img
-            src="/vaibhav.png"
-            alt="Vaibhav Sisinty"
-            className="w-9 h-9 rounded-lg object-cover shrink-0"
-          />
-          <div className="text-left">
-            <p className="text-white text-sm font-medium leading-tight">
-              Vaibhav Sisinty
-            </p>
-            <p className="text-secondary text-xs">Founder</p>
-          </div>
+      <div className="flex items-center gap-2.5 animate-[fade-in_0.5s_ease-out_0.4s_both]">
+        <img
+          src="/vaibhav.png"
+          alt="Vaibhav Sisinty"
+          className="w-10 h-10 rounded-lg object-cover shrink-0 border border-white/10"
+        />
+        <div className="text-left">
+          <p className="text-white text-sm font-medium leading-tight">
+            Vaibhav Sisinty
+          </p>
+          <p className="text-secondary text-xs">Founder, Staying Ahead</p>
         </div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="mt-2 animate-[fade-in_0.5s_ease-out_0.5s_both]">
+        <svg
+          className="w-5 h-5 text-secondary/40 animate-bounce"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
       </div>
     </section>
   );
