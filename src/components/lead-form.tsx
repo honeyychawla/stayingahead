@@ -43,7 +43,7 @@ export default function LeadForm() {
   const [dialCode, setDialCode] = useState("+91");
   const [phone, setPhone] = useState("");
   const [experience, setExperience] = useState("");
-  const [enrollMastermind, setEnrollMastermind] = useState(false);
+  const [enrollMastermind, setEnrollMastermind] = useState(true);
   const [country, setCountry] = useState("");
   const [countryCode, setCountryCode] = useState("");
   const [ipAddress, setIpAddress] = useState("");
@@ -283,42 +283,96 @@ export default function LeadForm() {
             <FieldError id="email-error" message={fieldErrors.email} />
           </div>
 
-          {/* Phone with country code */}
-          <div>
-            <div className="flex gap-2">
-              <label htmlFor="dial-code" className="sr-only">
-                Country calling code
+          {/* Contact fields */}
+          <div className="pt-1" aria-hidden="true" />
+          <div className="flex flex-col gap-3">
+            {/* Country */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm text-secondary" id="country-label">
+                Country
               </label>
-              <select
-                id="dial-code"
-                value={dialCode}
-                onChange={(e) => setDialCode(e.target.value)}
-                className={`${selectClasses} w-28 shrink-0`}
-              >
-                {COUNTRIES.map((c) => (
-                  <option key={c.code} value={c.dialCode}>
-                    {c.dialCode} {c.code}
-                  </option>
-                ))}
-              </select>
-              <div className="flex-1">
-                <label htmlFor="phone" className="sr-only">
-                  Phone number
-                </label>
-                <input
-                  id="phone"
-                  type="tel"
-                  placeholder="Phone number"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  aria-describedby="phone-error"
-                  aria-invalid={!!fieldErrors.phone}
-                  className={`${inputClasses} ${fieldErrors.phone ? "border-red-400/50" : ""}`}
-                />
-              </div>
+              {!geo.loaded ? (
+                <div className="bg-slate-card border border-white/10 rounded-lg px-4 py-3 h-12 flex items-center">
+                  <div className="h-4 w-32 bg-gray-700 rounded animate-pulse" />
+                </div>
+              ) : countryEditable ? (
+                <>
+                  <label htmlFor="country-select" className="sr-only">
+                    Select country
+                  </label>
+                  <select
+                    id="country-select"
+                    value={countryCode}
+                    onChange={(e) => handleCountryChange(e.target.value)}
+                    aria-labelledby="country-label"
+                    className={`${selectClasses} w-full`}
+                  >
+                    {COUNTRIES.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="bg-slate-card border border-white/10 rounded-lg px-4 py-3 text-white text-sm h-12 flex items-center">
+                    <span role="img" aria-label="Location pin">
+                      📍
+                    </span>{" "}
+                    {country} (detected)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCountryEditable(true)}
+                    className="text-lime text-sm hover:underline"
+                  >
+                    Change
+                  </button>
+                </div>
+              )}
             </div>
-            <FieldError id="phone-error" message={fieldErrors.phone} />
+
+            {/* Phone with country code */}
+            <div>
+              <div className="flex gap-2">
+                <label htmlFor="dial-code" className="sr-only">
+                  Country calling code
+                </label>
+                <select
+                  id="dial-code"
+                  value={dialCode}
+                  onChange={(e) => setDialCode(e.target.value)}
+                  className={`${selectClasses} w-28 shrink-0`}
+                >
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.dialCode}>
+                      {c.dialCode} {c.code}
+                    </option>
+                  ))}
+                </select>
+                <div className="flex-1">
+                  <label htmlFor="phone" className="sr-only">
+                    Phone number
+                  </label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    placeholder="Phone number"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    aria-describedby="phone-error"
+                    aria-invalid={!!fieldErrors.phone}
+                    className={`${inputClasses} ${fieldErrors.phone ? "border-red-400/50" : ""}`}
+                  />
+                </div>
+              </div>
+              <FieldError id="phone-error" message={fieldErrors.phone} />
+            </div>
           </div>
+
+          {/* Preferences */}
+          <div className="pt-1" aria-hidden="true" />
 
           {/* Work Experience - Custom Dropdown */}
           <div ref={experienceRef} className="relative">
@@ -382,8 +436,11 @@ export default function LeadForm() {
 
           {/* Mastermind toggle */}
           <div className="flex flex-col gap-2">
-            <label className="text-sm text-secondary" id="mastermind-label">
-              Enrol in Weekend AI Mastermind (Free)?
+            <label className="text-sm text-secondary flex items-center gap-2" id="mastermind-label">
+              Join Weekend AI Mastermind?
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-lime/10 text-lime">
+                Free
+              </span>
             </label>
             <div
               className="flex gap-2"
@@ -416,53 +473,6 @@ export default function LeadForm() {
               </button>
             </div>
           </div>
-
-          {/* Country */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm text-secondary" id="country-label">
-              Country
-            </label>
-            {!geo.loaded ? (
-              <div className="bg-slate-card border border-white/10 rounded-lg px-4 py-2 h-10">
-                <div className="h-4 w-32 bg-gray-700 rounded animate-pulse mt-0.5" />
-              </div>
-            ) : countryEditable ? (
-              <>
-                <label htmlFor="country-select" className="sr-only">
-                  Select country
-                </label>
-                <select
-                  id="country-select"
-                  value={countryCode}
-                  onChange={(e) => handleCountryChange(e.target.value)}
-                  aria-labelledby="country-label"
-                  className={`${selectClasses} w-full`}
-                >
-                  {COUNTRIES.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </>
-            ) : (
-              <div className="flex items-center gap-2">
-                <span className="bg-slate-card border border-white/10 rounded-lg px-4 py-2 text-white text-sm">
-                  <span role="img" aria-label="Location pin">
-                    📍
-                  </span>{" "}
-                  {country} (detected)
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setCountryEditable(true)}
-                  className="text-lime text-sm hover:underline"
-                >
-                  Change
-                </button>
-              </div>
-            )}
-          </div>
         </fieldset>
 
         {/* Error message */}
@@ -480,7 +490,7 @@ export default function LeadForm() {
         <button
           type="submit"
           disabled={loading}
-          className="bg-lime text-black font-semibold rounded-full w-full py-3.5 text-lg transition-all hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 mt-2 flex items-center justify-center gap-2"
+          className="bg-lime text-black font-semibold rounded-full w-full py-3.5 text-lg transition-all hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 mt-4 flex items-center justify-center gap-2"
         >
           {loading ? (
             <>
