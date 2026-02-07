@@ -15,10 +15,10 @@ const EXPERIENCE_OPTIONS = [
 ];
 
 const inputClasses =
-  "w-full bg-slate-card border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-secondary/60 focus:outline-none focus:border-lime/40 focus-visible:ring-1 focus-visible:ring-lime/40 transition-colors";
+  "w-full bg-slate-card border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-secondary/60 focus:outline-none focus:border-lime/40 focus-visible:ring-1 focus-visible:ring-lime/40 focus:shadow-[0_0_8px_rgba(196,242,73,0.1)] transition-[color,border-color,box-shadow]";
 
 const selectClasses =
-  "bg-slate-card border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-lime/40 focus-visible:ring-1 focus-visible:ring-lime/40 transition-colors appearance-none";
+  "bg-slate-card border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-lime/40 focus-visible:ring-1 focus-visible:ring-lime/40 focus:shadow-[0_0_8px_rgba(196,242,73,0.1)] transition-[color,border-color,box-shadow] appearance-none";
 
 function FieldError({ message, id }: { message?: string; id: string }) {
   if (!message) return null;
@@ -49,7 +49,9 @@ export default function LeadForm() {
   const [ipAddress, setIpAddress] = useState("");
   const [countryEditable, setCountryEditable] = useState(false);
   const [experienceOpen, setExperienceOpen] = useState(false);
+  const [dialCodeOpen, setDialCodeOpen] = useState(false);
   const experienceRef = useRef<HTMLDivElement>(null);
+  const dialCodeRef = useRef<HTMLDivElement>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -104,12 +106,41 @@ export default function LeadForm() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Close dial code dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dialCodeRef.current &&
+        !dialCodeRef.current.contains(e.target as Node)
+      ) {
+        setDialCodeOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   function handleCountryChange(code: string) {
     const match = COUNTRIES.find((c) => c.code === code);
     if (match) {
       setCountry(match.name);
       setCountryCode(match.code);
       setDialCode(match.dialCode);
+    }
+  }
+
+  function isFieldValid(field: string): boolean {
+    switch (field) {
+      case "name":
+        return name.trim().length >= 2;
+      case "email":
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+      case "phone":
+        return phone.replace(/\D/g, "").length >= 10;
+      case "experience":
+        return experience !== "";
+      default:
+        return false;
     }
   }
 
@@ -190,31 +221,54 @@ export default function LeadForm() {
     }
   }
 
+  const validCheckmark = (
+    <svg
+      className="w-4 h-4 text-lime absolute right-3 top-1/2 -translate-y-1/2"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={3}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M5 13l4 4L19 7" />
+    </svg>
+  );
+
   // Success view
   if (successData) {
     return (
       <section aria-live="polite">
         <div className="bg-slate-card border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_0_30px_rgba(196,242,73,0.08)] flex flex-col items-center justify-center gap-4 min-h-[300px]">
-          <div className="w-16 h-16 rounded-full bg-lime/20 flex items-center justify-center animate-[scale-in_0.4s_ease-out]">
-            <svg
-              className="w-8 h-8 text-lime"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={3}
+          <div className="relative flex items-center justify-center">
+            {/* Pulse ring */}
+            <div
+              className="absolute w-16 h-16 rounded-full bg-lime/20 animate-[pulse-ring_2s_ease-out_infinite_0.5s]"
               aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M5 13l4 4L19 7"
-                className="animate-[draw-check_0.4s_ease-out_0.2s_both]"
-                style={{
-                  strokeDasharray: 24,
-                  strokeDashoffset: 24,
-                }}
-              />
-            </svg>
+            />
+            {/* Checkmark circle */}
+            <div className="w-16 h-16 rounded-full bg-lime/20 flex items-center justify-center animate-[scale-in_0.4s_ease-out] relative">
+              <svg
+                className="w-8 h-8 text-lime"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={3}
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 13l4 4L19 7"
+                  className="animate-[draw-check_0.4s_ease-out_0.2s_both]"
+                  style={{
+                    strokeDasharray: 24,
+                    strokeDashoffset: 24,
+                  }}
+                />
+              </svg>
+            </div>
           </div>
 
           <h2 className="font-heading text-2xl sm:text-3xl font-bold text-white">
@@ -240,142 +294,187 @@ export default function LeadForm() {
   }
 
   return (
-    <section className="animate-[fade-in_0.5s_ease-out]">
+    <section>
       <form
         onSubmit={handleSubmit}
         noValidate
         className="bg-slate-card border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_0_30px_rgba(196,242,73,0.08)] flex flex-col gap-4"
       >
-        <fieldset disabled={loading} className="contents">
+        <fieldset
+          disabled={loading}
+          className={`flex flex-col gap-4 ${loading ? "opacity-60" : "opacity-100"} transition-opacity duration-300`}
+        >
           {/* Name */}
-          <div>
+          <div style={{ animationDelay: "0ms" }} className="animate-[fade-in_0.4s_ease-out_both]">
             <label htmlFor="name" className="sr-only">
               Your name
             </label>
-            <input
-              id="name"
-              type="text"
-              placeholder="Your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              aria-describedby="name-error"
-              aria-invalid={!!fieldErrors.name}
-              className={`${inputClasses} ${fieldErrors.name ? "border-red-400/50" : ""}`}
-            />
+            <div className="relative">
+              <input
+                id="name"
+                type="text"
+                placeholder="Your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                aria-describedby="name-error"
+                aria-invalid={!!fieldErrors.name}
+                className={`${inputClasses} ${fieldErrors.name ? "border-red-400/50" : ""} ${name.trim() && isFieldValid("name") ? "pr-10" : ""}`}
+              />
+              {name.trim() && isFieldValid("name") && validCheckmark}
+            </div>
             <FieldError id="name-error" message={fieldErrors.name} />
           </div>
 
           {/* Email */}
-          <div>
+          <div style={{ animationDelay: "60ms" }} className="animate-[fade-in_0.4s_ease-out_both]">
             <label htmlFor="email" className="sr-only">
               Email address
             </label>
-            <input
-              id="email"
-              type="email"
-              placeholder="Email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              aria-describedby="email-error"
-              aria-invalid={!!fieldErrors.email}
-              className={`${inputClasses} ${fieldErrors.email ? "border-red-400/50" : ""}`}
-            />
+            <div className="relative">
+              <input
+                id="email"
+                type="email"
+                placeholder="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                aria-describedby="email-error"
+                aria-invalid={!!fieldErrors.email}
+                className={`${inputClasses} ${fieldErrors.email ? "border-red-400/50" : ""} ${email.trim() && isFieldValid("email") ? "pr-10" : ""}`}
+              />
+              {email.trim() && isFieldValid("email") && validCheckmark}
+            </div>
             <FieldError id="email-error" message={fieldErrors.email} />
           </div>
 
-          {/* Contact fields */}
-          <div className="pt-1" aria-hidden="true" />
-          <div className="flex flex-col gap-3">
-            {/* Country */}
-            <div className="flex flex-col gap-2">
-              <label className="text-sm text-secondary" id="country-label">
-                Country
-              </label>
-              {!geo.loaded ? (
-                <div className="bg-slate-card border border-white/10 rounded-lg px-4 py-3 h-12 flex items-center">
-                  <div className="h-4 w-32 bg-gray-700 rounded animate-pulse" />
-                </div>
-              ) : countryEditable ? (
-                <>
-                  <label htmlFor="country-select" className="sr-only">
-                    Select country
-                  </label>
-                  <select
-                    id="country-select"
-                    value={countryCode}
-                    onChange={(e) => handleCountryChange(e.target.value)}
-                    aria-labelledby="country-label"
-                    className={`${selectClasses} w-full`}
-                  >
-                    {COUNTRIES.map((c) => (
-                      <option key={c.code} value={c.code}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span className="bg-slate-card border border-white/10 rounded-lg px-4 py-3 text-white text-sm h-12 flex items-center">
-                    <span role="img" aria-label="Location pin">
-                      📍
-                    </span>{" "}
-                    {country} (detected)
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setCountryEditable(true)}
-                    className="text-lime text-sm hover:underline"
-                  >
-                    Change
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Phone with country code */}
-            <div>
-              <div className="flex gap-2">
-                <label htmlFor="dial-code" className="sr-only">
-                  Country calling code
+          {/* Country */}
+          <div style={{ animationDelay: "120ms" }} className="animate-[fade-in_0.4s_ease-out_both]">
+            <span id="country-label" className="sr-only">Country</span>
+            {!geo.loaded ? (
+              <div className="w-full bg-slate-card border border-white/10 rounded-lg px-4 py-3 h-12 flex items-center">
+                <div className="h-4 w-full max-w-[160px] bg-gray-700 rounded animate-pulse" />
+              </div>
+            ) : countryEditable ? (
+              <>
+                <label htmlFor="country-select" className="sr-only">
+                  Select country
                 </label>
                 <select
-                  id="dial-code"
-                  value={dialCode}
-                  onChange={(e) => setDialCode(e.target.value)}
-                  className={`${selectClasses} w-28 shrink-0`}
+                  id="country-select"
+                  value={countryCode}
+                  onChange={(e) => handleCountryChange(e.target.value)}
+                  aria-labelledby="country-label"
+                  className={`${selectClasses} w-full`}
                 >
                   {COUNTRIES.map((c) => (
-                    <option key={c.code} value={c.dialCode}>
-                      {c.dialCode} {c.code}
+                    <option key={c.code} value={c.code}>
+                      {c.name}
                     </option>
                   ))}
                 </select>
-                <div className="flex-1">
-                  <label htmlFor="phone" className="sr-only">
-                    Phone number
-                  </label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    placeholder="Phone number"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    aria-describedby="phone-error"
-                    aria-invalid={!!fieldErrors.phone}
-                    className={`${inputClasses} ${fieldErrors.phone ? "border-red-400/50" : ""}`}
-                  />
-                </div>
+              </>
+            ) : (
+              <div className="w-full bg-slate-card border border-white/10 rounded-lg px-4 py-3 h-12 flex items-center justify-between">
+                <span className="text-white text-sm flex items-center gap-1.5">
+                  <span role="img" aria-label="Location pin">
+                    📍
+                  </span>
+                  {country} (detected)
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCountryEditable(true)}
+                  className="text-lime text-xs hover:underline shrink-0 cursor-pointer"
+                >
+                  Change
+                </button>
               </div>
-              <FieldError id="phone-error" message={fieldErrors.phone} />
-            </div>
+            )}
           </div>
 
-          {/* Preferences */}
-          <div className="pt-1" aria-hidden="true" />
+          {/* Phone with country code */}
+          <div style={{ animationDelay: "180ms" }} className="animate-[fade-in_0.4s_ease-out_both]">
+            <div className="flex gap-2">
+              {/* Custom dial code dropdown */}
+              <div ref={dialCodeRef} className="relative shrink-0">
+                <label htmlFor="dial-code-btn" className="sr-only">
+                  Country calling code
+                </label>
+                <button
+                  id="dial-code-btn"
+                  type="button"
+                  onClick={() => setDialCodeOpen(!dialCodeOpen)}
+                  aria-expanded={dialCodeOpen}
+                  aria-haspopup="listbox"
+                  className={`${selectClasses} w-28 text-left flex items-center justify-between cursor-pointer`}
+                >
+                  <span className="text-sm">{dialCode} {countryCode || "IN"}</span>
+                  <svg
+                    className={`w-4 h-4 text-secondary transition-transform ${dialCodeOpen ? "rotate-180" : ""}`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+
+                {dialCodeOpen && (
+                  <div
+                    role="listbox"
+                    aria-label="Country calling code options"
+                    className="absolute z-[70] left-0 mt-1 w-56 max-h-60 overflow-y-auto bg-slate-card border border-white/10 rounded-lg py-1 shadow-lg"
+                  >
+                    {COUNTRIES.map((c) => (
+                      <button
+                        key={c.code}
+                        type="button"
+                        role="option"
+                        aria-selected={dialCode === c.dialCode && countryCode === c.code}
+                        onClick={() => {
+                          setDialCode(c.dialCode);
+                          setDialCodeOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer hover:bg-lime hover:text-black ${
+                          dialCode === c.dialCode ? "text-lime" : "text-white"
+                        }`}
+                      >
+                        {c.name} ({c.dialCode})
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 relative">
+                <label htmlFor="phone" className="sr-only">
+                  Phone number
+                </label>
+                <input
+                  id="phone"
+                  type="tel"
+                  placeholder="Phone number"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  aria-describedby="phone-error"
+                  aria-invalid={!!fieldErrors.phone}
+                  className={`${inputClasses} ${fieldErrors.phone ? "border-red-400/50" : ""} ${phone.trim() && isFieldValid("phone") ? "pr-10" : ""}`}
+                />
+                {phone.trim() && isFieldValid("phone") && validCheckmark}
+              </div>
+            </div>
+            <FieldError id="phone-error" message={fieldErrors.phone} />
+          </div>
 
           {/* Work Experience - Custom Dropdown */}
-          <div ref={experienceRef} className="relative">
+          <div
+            ref={experienceRef}
+            className="relative animate-[fade-in_0.4s_ease-out_both]"
+            style={{ animationDelay: "240ms" }}
+          >
             <label htmlFor="experience-btn" className="sr-only">
               Work experience
             </label>
@@ -391,7 +490,23 @@ export default function LeadForm() {
                 !experience ? "text-secondary/60" : ""
               } ${fieldErrors.experience ? "border-red-400/50" : ""}`}
             >
-              {experience || "Work experience"}
+              <span className="flex items-center gap-2">
+                {experience || "Work experience"}
+                {experience && isFieldValid("experience") && (
+                  <svg
+                    className="w-4 h-4 text-lime shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={3}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </span>
               <svg
                 className={`w-4 h-4 text-secondary transition-transform ${experienceOpen ? "rotate-180" : ""}`}
                 viewBox="0 0 24 24"
@@ -435,7 +550,10 @@ export default function LeadForm() {
           </div>
 
           {/* Mastermind toggle */}
-          <div className="flex flex-col gap-2">
+          <div
+            className="flex flex-col gap-2 animate-[fade-in_0.4s_ease-out_both]"
+            style={{ animationDelay: "300ms" }}
+          >
             <label className="text-sm text-secondary flex items-center gap-2" id="mastermind-label">
               Join Weekend AI Mastermind?
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-lime/10 text-lime">
@@ -475,55 +593,95 @@ export default function LeadForm() {
           </div>
         </fieldset>
 
-        {/* Error message */}
-        {error && (
-          <p
-            role="alert"
-            aria-live="polite"
-            className="text-red-400 text-sm text-center"
-          >
-            {error}
-          </p>
-        )}
-
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-lime text-black font-semibold rounded-full w-full py-3.5 text-lg transition-all hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 mt-4 flex items-center justify-center gap-2"
+        {/* Bottom section: social proof, error, submit, privacy */}
+        <div
+          className="flex flex-col gap-4 animate-[fade-in_0.4s_ease-out_both]"
+          style={{ animationDelay: "360ms" }}
         >
-          {loading ? (
-            <>
-              <svg
-                className="animate-spin h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                />
-              </svg>
-              Joining...
-            </>
-          ) : (
-            "Join the Community \u2192"
-          )}
-        </button>
+          {/* Social proof avatars */}
+          <div className="flex items-center gap-2 justify-center">
+            <div className="flex items-center">
+              {["VS", "AK", "PR", "MS", "JD"].map((initials, i) => (
+                <div
+                  key={initials}
+                  className={`w-6 h-6 rounded-full bg-lime/20 text-lime text-[10px] font-bold flex items-center justify-center border border-void ${i > 0 ? "-ml-2" : ""}`}
+                >
+                  {initials}
+                </div>
+              ))}
+            </div>
+            <span className="text-secondary text-xs">10,000+ joined</span>
+          </div>
 
-        <p className="text-secondary text-sm text-center">
-          Join 10,000+ AI enthusiasts
-        </p>
+          {/* Error message */}
+          {error && (
+            <div
+              role="alert"
+              aria-live="polite"
+              className="bg-red-500/10 border border-red-400/20 rounded-lg px-4 py-3 text-red-400 text-sm text-center"
+            >
+              {error}
+            </div>
+          )}
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-lime text-black font-semibold rounded-full w-full py-3.5 text-lg transition-all hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+                Joining...
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                </svg>
+                Get Instant Access &rarr;
+              </>
+            )}
+          </button>
+
+          {/* Privacy trust signal */}
+          <p className="text-secondary text-xs text-center flex items-center justify-center gap-1.5">
+            <svg
+              className="w-3.5 h-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0110 0v4" />
+            </svg>
+            Your data is safe. No spam, ever.
+          </p>
+        </div>
       </form>
     </section>
   );
