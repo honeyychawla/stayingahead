@@ -50,6 +50,7 @@ export default function LeadForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [dialCode, setDialCode] = useState("+91");
+  const [dialCountryCode, setDialCountryCode] = useState("IN");
   const [phone, setPhone] = useState("");
   const [experience, setExperience] = useState("");
   const [enrollMastermind, setEnrollMastermind] = useState(true);
@@ -86,7 +87,10 @@ export default function LeadForm() {
     setCountry(geo.country);
     setCountryCode(geo.countryCode);
     setIpAddress(geo.ip);
-    if (geo.dialCode) setDialCode(geo.dialCode);
+    if (geo.dialCode) {
+      setDialCode(geo.dialCode);
+      setDialCountryCode(geo.countryCode);
+    }
   }, [geo.loaded, geo.error, geo.country, geo.countryCode, geo.ip, geo.dialCode]);
 
   // Redirect after success
@@ -132,6 +136,7 @@ export default function LeadForm() {
       setCountry(match.name);
       setCountryCode(match.code);
       setDialCode(match.dialCode);
+      setDialCountryCode(match.code);
     }
   }
 
@@ -327,15 +332,14 @@ export default function LeadForm() {
               key={c.code}
               type="button"
               role="option"
-              aria-selected={dialCode === c.dialCode && countryCode === c.code}
+              aria-selected={dialCountryCode === c.code}
               onClick={() => {
                 setDialCode(c.dialCode);
-                setCountryCode(c.code);
-                setCountry(c.name);
+                setDialCountryCode(c.code);
                 setDialCodeOpen(false);
               }}
               className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer hover:bg-lime hover:text-black ${
-                dialCode === c.dialCode ? "text-lime" : "text-white"
+                dialCountryCode === c.code ? "text-lime" : "text-white"
               }`}
             >
               <span className="mr-2">{countryFlag(c.code)}</span>
@@ -473,7 +477,7 @@ export default function LeadForm() {
                   aria-haspopup="listbox"
                   className="flex items-center gap-1.5 pl-3 pr-2 py-3 cursor-pointer text-white bg-transparent border-none outline-none"
                 >
-                  <span className="text-base leading-none">{countryFlag(countryCode || "IN")}</span>
+                  <span className="text-base leading-none">{countryFlag(dialCountryCode)}</span>
                   <span className="text-sm">{dialCode}</span>
                   <svg
                     className={`w-3.5 h-3.5 text-secondary/60 transition-transform ${dialCodeOpen ? "rotate-180" : ""}`}
