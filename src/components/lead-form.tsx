@@ -696,7 +696,7 @@ export default function LeadForm() {
                 </div>
               ))}
             </div>
-            <span className="text-secondary text-xs">10,000+ joined</span>
+            <span className="text-secondary text-xs">100,000+ joined</span>
           </div>
 
           {/* Error message */}
