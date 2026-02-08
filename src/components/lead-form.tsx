@@ -662,7 +662,7 @@ export default function LeadForm() {
               ].map((avatar, i) => (
                 <div
                   key={avatar.src}
-                  className={`w-8 h-8 rounded-full border-2 border-void overflow-hidden shrink-0 ${i > 0 ? "-ml-2.5" : ""}`}
+                  className={`w-8 h-8 rounded-full border-2 border-slate-card overflow-hidden shrink-0 ${i > 0 ? "-ml-2.5" : ""}`}
                 >
                   <img
                     src={avatar.src}
