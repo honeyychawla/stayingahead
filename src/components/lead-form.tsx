@@ -407,7 +407,7 @@ export default function LeadForm() {
           </div>
 
           {/* Phone with country code — unified container */}
-          <div style={{ animationDelay: "180ms" }} className="animate-[fade-in_0.4s_ease-out_both]">
+          <div style={{ animationDelay: "180ms" }} className={`animate-[fade-in_0.4s_ease-out_both] ${dialCodeOpen ? "z-[70] relative" : ""}`}>
             <div
               className={`flex items-center bg-slate-card border rounded-lg transition-[color,border-color,box-shadow] ${
                 fieldErrors.phone
