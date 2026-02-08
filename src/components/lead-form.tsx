@@ -147,7 +147,7 @@ export default function LeadForm() {
       case "email":
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
       case "phone":
-        return phone.replace(/\D/g, "").length >= 10;
+        return phone.length === 10;
       case "experience":
         return experience !== "";
       default:
@@ -171,11 +171,10 @@ export default function LeadForm() {
       errors.email = "Please enter a valid email address.";
     }
 
-    const digitsOnly = phone.replace(/\D/g, "");
     if (!phone.trim()) {
       errors.phone = "Phone number is required.";
-    } else if (digitsOnly.length < 10) {
-      errors.phone = "Phone number must be at least 10 digits.";
+    } else if (phone.length !== 10) {
+      errors.phone = "Phone number must be exactly 10 digits.";
     }
 
     if (!experience) {
@@ -506,9 +505,15 @@ export default function LeadForm() {
                 <input
                   id="phone"
                   type="tel"
-                  placeholder="Phone number"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={10}
+                  placeholder="Phone number (10 digits)"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => {
+                    const digits = e.target.value.replace(/\D/g, "");
+                    if (digits.length <= 10) setPhone(digits);
+                  }}
                   aria-describedby="phone-error"
                   aria-invalid={!!fieldErrors.phone}
                   className={`w-full bg-transparent border-none rounded-r-lg px-3 py-3 text-white placeholder:text-secondary/60 focus:outline-none ${
