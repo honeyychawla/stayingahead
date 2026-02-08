@@ -623,48 +623,27 @@ export default function LeadForm() {
             <FieldError id="experience-error" message={fieldErrors.experience} />
           </div>
 
-          {/* Mastermind toggle */}
-          <div
-            className="flex flex-col gap-2 animate-[fade-in_0.4s_ease-out_both]"
+          {/* Mastermind opt-in */}
+          <label
+            className="flex items-start gap-3 cursor-pointer animate-[fade-in_0.4s_ease-out_both]"
             style={{ animationDelay: "300ms" }}
           >
-            <label className="text-sm text-secondary flex items-center gap-2" id="mastermind-label">
-              Join Weekend AI Mastermind?
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-lime/10 text-lime">
-                Free
+            <input
+              type="checkbox"
+              checked={enrollMastermind}
+              onChange={(e) => setEnrollMastermind(e.target.checked)}
+              className="mt-0.5 w-4 h-4 accent-lime rounded cursor-pointer shrink-0"
+            />
+            <span className="text-sm text-secondary leading-snug">
+              Also register me for the{" "}
+              <span className="text-white font-medium">Free Weekend AI Masterclass</span>
+              <span className="inline-flex items-center ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-lime/15 text-lime align-middle">
+                Live &amp; Free
               </span>
-            </label>
-            <div
-              className="flex gap-2"
-              role="group"
-              aria-labelledby="mastermind-label"
-            >
-              <button
-                type="button"
-                onClick={() => setEnrollMastermind(true)}
-                aria-pressed={enrollMastermind}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
-                  enrollMastermind
-                    ? "bg-lime text-black"
-                    : "bg-white/5 border border-white/10 text-white"
-                }`}
-              >
-                Yes
-              </button>
-              <button
-                type="button"
-                onClick={() => setEnrollMastermind(false)}
-                aria-pressed={!enrollMastermind}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
-                  !enrollMastermind
-                    ? "bg-lime text-black"
-                    : "bg-white/5 border border-white/10 text-white"
-                }`}
-              >
-                No
-              </button>
-            </div>
-          </div>
+              <br />
+              <span className="text-secondary/70 text-xs">Live online sessions every Saturday &amp; Sunday</span>
+            </span>
+          </label>
         </fieldset>
 
         {/* Bottom section: social proof, error, submit, privacy */}
