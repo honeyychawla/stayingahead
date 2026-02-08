@@ -61,6 +61,8 @@ export default function LeadForm() {
   const [dialCodeOpen, setDialCodeOpen] = useState(false);
   const experienceRef = useRef<HTMLDivElement>(null);
   const dialCodeRef = useRef<HTMLDivElement>(null);
+  const dialCodeBtnRef = useRef<HTMLButtonElement>(null);
+  const [dialCodePos, setDialCodePos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -113,7 +115,9 @@ export default function LeadForm() {
       }
       if (
         dialCodeRef.current &&
-        !dialCodeRef.current.contains(e.target as Node)
+        !dialCodeRef.current.contains(e.target as Node) &&
+        dialCodeBtnRef.current &&
+        !dialCodeBtnRef.current.contains(e.target as Node)
       ) {
         setDialCodeOpen(false);
       }
@@ -309,6 +313,38 @@ export default function LeadForm() {
         />
       )}
 
+      {/* Dial code dropdown — rendered outside form to escape stacking contexts */}
+      {dialCodeOpen && (
+        <div
+          ref={dialCodeRef}
+          role="listbox"
+          aria-label="Country calling code options"
+          className="fixed z-[80] w-64 max-h-[min(15rem,40vh)] overflow-y-auto bg-slate-card border border-white/10 rounded-lg py-1 shadow-[0_8px_30px_rgba(0,0,0,0.5)] dropdown-scroll [touch-action:pan-y]"
+          style={{ top: dialCodePos.top, left: dialCodePos.left }}
+        >
+          {COUNTRIES.map((c) => (
+            <button
+              key={c.code}
+              type="button"
+              role="option"
+              aria-selected={dialCode === c.dialCode && countryCode === c.code}
+              onClick={() => {
+                setDialCode(c.dialCode);
+                setCountryCode(c.code);
+                setCountry(c.name);
+                setDialCodeOpen(false);
+              }}
+              className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer hover:bg-lime hover:text-black ${
+                dialCode === c.dialCode ? "text-lime" : "text-white"
+              }`}
+            >
+              <span className="mr-2">{countryFlag(c.code)}</span>
+              {c.name} ({c.dialCode})
+            </button>
+          ))}
+        </div>
+      )}
+
       <form
         onSubmit={handleSubmit}
         noValidate
@@ -407,7 +443,7 @@ export default function LeadForm() {
           </div>
 
           {/* Phone with country code — unified container */}
-          <div style={{ animationDelay: "180ms" }} className={`animate-[fade-in_0.4s_ease-out_both] ${dialCodeOpen ? "z-[70] relative" : ""}`}>
+          <div style={{ animationDelay: "180ms" }} className="animate-[fade-in_0.4s_ease-out_both]">
             <div
               className={`flex items-center bg-slate-card border rounded-lg transition-[color,border-color,box-shadow] ${
                 fieldErrors.phone
@@ -418,14 +454,21 @@ export default function LeadForm() {
               } focus-within:border-lime/40 focus-within:ring-1 focus-within:ring-lime/40 focus-within:shadow-[0_0_8px_rgba(196,242,73,0.1)]`}
             >
               {/* Dial code dropdown */}
-              <div ref={dialCodeRef} className={`relative shrink-0 ${dialCodeOpen ? "z-[70]" : ""}`}>
+              <div className="relative shrink-0">
                 <label htmlFor="dial-code-btn" className="sr-only">
                   Country calling code
                 </label>
                 <button
                   id="dial-code-btn"
+                  ref={dialCodeBtnRef}
                   type="button"
-                  onClick={() => setDialCodeOpen(!dialCodeOpen)}
+                  onClick={() => {
+                    if (!dialCodeOpen && dialCodeBtnRef.current) {
+                      const rect = dialCodeBtnRef.current.getBoundingClientRect();
+                      setDialCodePos({ top: rect.bottom + 4, left: rect.left });
+                    }
+                    setDialCodeOpen(!dialCodeOpen);
+                  }}
                   aria-expanded={dialCodeOpen}
                   aria-haspopup="listbox"
                   className="flex items-center gap-1.5 pl-3 pr-2 py-3 cursor-pointer text-white bg-transparent border-none outline-none"
@@ -446,32 +489,6 @@ export default function LeadForm() {
                   </svg>
                 </button>
 
-                {dialCodeOpen && (
-                  <div
-                    role="listbox"
-                    aria-label="Country calling code options"
-                    className="absolute z-[70] left-0 mt-1 w-64 max-h-[min(15rem,40vh)] overflow-y-auto bg-slate-card border border-white/10 rounded-lg py-1 shadow-[0_8px_30px_rgba(0,0,0,0.5)] dropdown-scroll [touch-action:pan-y]"
-                  >
-                    {COUNTRIES.map((c) => (
-                      <button
-                        key={c.code}
-                        type="button"
-                        role="option"
-                        aria-selected={dialCode === c.dialCode && countryCode === c.code}
-                        onClick={() => {
-                          setDialCode(c.dialCode);
-                          setDialCodeOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer hover:bg-lime hover:text-black ${
-                          dialCode === c.dialCode ? "text-lime" : "text-white"
-                        }`}
-                      >
-                        <span className="mr-2">{countryFlag(c.code)}</span>
-                        {c.name} ({c.dialCode})
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
 
               {/* Vertical divider */}
