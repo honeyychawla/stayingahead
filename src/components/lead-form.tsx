@@ -92,7 +92,8 @@ export default function LeadForm() {
     return () => clearTimeout(timer);
   }, [successData]);
 
-  // Close experience dropdown on outside click
+  // Close dropdowns on outside click (using click instead of mousedown
+  // so the option's onClick fires first before this handler runs)
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (
@@ -101,14 +102,6 @@ export default function LeadForm() {
       ) {
         setExperienceOpen(false);
       }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Close dial code dropdown on outside click
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
       if (
         dialCodeRef.current &&
         !dialCodeRef.current.contains(e.target as Node)
@@ -116,8 +109,8 @@ export default function LeadForm() {
         setDialCodeOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
   function handleCountryChange(code: string) {
@@ -295,24 +288,24 @@ export default function LeadForm() {
 
   return (
     <section>
+      {/* Mobile backdrop when dropdown is open — outside form to avoid stacking context issues */}
+      {(dialCodeOpen || experienceOpen) && (
+        <div
+          className="fixed inset-0 bg-black/40 z-[65] sm:hidden"
+          onClick={() => {
+            setDialCodeOpen(false);
+            setExperienceOpen(false);
+          }}
+          aria-hidden="true"
+        />
+      )}
+
       <form
         onSubmit={handleSubmit}
         noValidate
         aria-busy={loading}
         className="bg-slate-card border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_0_30px_rgba(196,242,73,0.08)] flex flex-col gap-4"
       >
-        {/* Mobile backdrop when dropdown is open */}
-        {(dialCodeOpen || experienceOpen) && (
-          <div
-            className="fixed inset-0 bg-black/40 z-[65] sm:hidden"
-            onClick={() => {
-              setDialCodeOpen(false);
-              setExperienceOpen(false);
-            }}
-            aria-hidden="true"
-          />
-        )}
-
         <fieldset
           disabled={loading}
           className={`flex flex-col gap-4 ${loading ? "opacity-60" : "opacity-100"} transition-opacity duration-300`}
@@ -376,7 +369,7 @@ export default function LeadForm() {
                   value={countryCode}
                   onChange={(e) => handleCountryChange(e.target.value)}
                   aria-labelledby="country-label"
-                  className={`${selectClasses} w-full`}
+                  className={`${selectClasses} w-full relative z-[1]`}
                 >
                   {COUNTRIES.map((c) => (
                     <option key={c.code} value={c.code}>
@@ -408,7 +401,7 @@ export default function LeadForm() {
           <div style={{ animationDelay: "180ms" }} className="animate-[fade-in_0.4s_ease-out_both]">
             <div className="flex gap-2">
               {/* Custom dial code dropdown */}
-              <div ref={dialCodeRef} className="relative shrink-0">
+              <div ref={dialCodeRef} className={`relative shrink-0 ${dialCodeOpen ? "z-[70]" : ""}`}>
                 <label htmlFor="dial-code-btn" className="sr-only">
                   Country calling code
                 </label>
@@ -439,7 +432,7 @@ export default function LeadForm() {
                   <div
                     role="listbox"
                     aria-label="Country calling code options"
-                    className="absolute z-[70] left-0 mt-1 w-56 max-h-[min(15rem,40vh)] overflow-y-auto bg-slate-card border border-white/10 rounded-lg py-1 shadow-[0_8px_30px_rgba(0,0,0,0.5)] dropdown-scroll"
+                    className="absolute z-[70] left-0 mt-1 w-56 max-h-[min(15rem,40vh)] overflow-y-auto bg-slate-card border border-white/10 rounded-lg py-1 shadow-[0_8px_30px_rgba(0,0,0,0.5)] dropdown-scroll [touch-action:pan-y]"
                   >
                     {COUNTRIES.map((c) => (
                       <button
@@ -485,7 +478,7 @@ export default function LeadForm() {
           {/* Work Experience - Custom Dropdown */}
           <div
             ref={experienceRef}
-            className="relative animate-[fade-in_0.4s_ease-out_both]"
+            className={`relative animate-[fade-in_0.4s_ease-out_both] ${experienceOpen ? "z-[70]" : ""}`}
             style={{ animationDelay: "240ms" }}
           >
             <label htmlFor="experience-btn" className="sr-only">
@@ -538,7 +531,7 @@ export default function LeadForm() {
               <div
                 role="listbox"
                 aria-label="Work experience options"
-                className="absolute z-[70] left-0 right-0 mt-1 bg-slate-card border border-white/10 rounded-lg py-1 shadow-[0_8px_30px_rgba(0,0,0,0.5)] dropdown-scroll"
+                className="absolute z-[70] left-0 right-0 mt-1 bg-slate-card border border-white/10 rounded-lg py-1 shadow-[0_8px_30px_rgba(0,0,0,0.5)] dropdown-scroll [touch-action:pan-y]"
               >
                 {EXPERIENCE_OPTIONS.map((opt) => (
                   <button
