@@ -137,8 +137,20 @@ export default function LeadForm() {
       setCountryCode(match.code);
       setDialCode(match.dialCode);
       setDialCountryCode(match.code);
+      // Trim phone if it exceeds new country's max length
+      const max = Array.isArray(match.phoneLength) ? match.phoneLength[1] : match.phoneLength;
+      if (phone.length > max) setPhone(phone.slice(0, max));
     }
   }
+
+  // Derive phone length constraints from selected dial code country
+  const selectedCountry = COUNTRIES.find((c) => c.code === dialCountryCode);
+  const phoneMin = selectedCountry
+    ? Array.isArray(selectedCountry.phoneLength) ? selectedCountry.phoneLength[0] : selectedCountry.phoneLength
+    : 7;
+  const phoneMax = selectedCountry
+    ? Array.isArray(selectedCountry.phoneLength) ? selectedCountry.phoneLength[1] : selectedCountry.phoneLength
+    : 15;
 
   function isFieldValid(field: string): boolean {
     switch (field) {
@@ -147,7 +159,7 @@ export default function LeadForm() {
       case "email":
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
       case "phone":
-        return phone.length === 10;
+        return phone.length >= phoneMin && phone.length <= phoneMax;
       case "experience":
         return experience !== "";
       default:
@@ -173,8 +185,10 @@ export default function LeadForm() {
 
     if (!phone.trim()) {
       errors.phone = "Phone number is required.";
-    } else if (phone.length !== 10) {
-      errors.phone = "Phone number must be exactly 10 digits.";
+    } else if (phone.length < phoneMin || phone.length > phoneMax) {
+      errors.phone = phoneMin === phoneMax
+        ? `Phone number must be ${phoneMin} digits.`
+        : `Phone number must be ${phoneMin}–${phoneMax} digits.`;
     }
 
     if (!experience) {
@@ -336,6 +350,9 @@ export default function LeadForm() {
                 setDialCode(c.dialCode);
                 setDialCountryCode(c.code);
                 setDialCodeOpen(false);
+                // Trim phone if it exceeds new country's max length
+                const max = Array.isArray(c.phoneLength) ? c.phoneLength[1] : c.phoneLength;
+                if (phone.length > max) setPhone(phone.slice(0, max));
               }}
               className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer hover:bg-lime hover:text-black ${
                 dialCountryCode === c.code ? "text-lime" : "text-white"
@@ -507,12 +524,12 @@ export default function LeadForm() {
                   type="tel"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  maxLength={10}
-                  placeholder="Phone number (10 digits)"
+                  maxLength={phoneMax}
+                  placeholder="Phone number"
                   value={phone}
                   onChange={(e) => {
                     const digits = e.target.value.replace(/\D/g, "");
-                    if (digits.length <= 10) setPhone(digits);
+                    if (digits.length <= phoneMax) setPhone(digits);
                   }}
                   aria-describedby="phone-error"
                   aria-invalid={!!fieldErrors.phone}
