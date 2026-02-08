@@ -673,14 +673,26 @@ export default function LeadForm() {
           style={{ animationDelay: "360ms" }}
         >
           {/* Social proof avatars */}
-          <div className="flex items-center gap-2 justify-center">
+          <div className="flex items-center gap-2.5 justify-center">
             <div className="flex items-center">
-              {["VS", "AK", "PR", "MS", "JD"].map((initials, i) => (
+              {[
+                { src: "/avatar-1.jpg", alt: "Community member" },
+                { src: "/avatar-2.jpg", alt: "Community member" },
+                { src: "/avatar-3.jpg", alt: "Community member" },
+                { src: "/avatar-4.jpg", alt: "Community member" },
+              ].map((avatar, i) => (
                 <div
-                  key={initials}
-                  className={`w-6 h-6 rounded-full bg-lime/20 text-lime text-[10px] font-bold flex items-center justify-center border border-void ${i > 0 ? "-ml-2" : ""}`}
+                  key={avatar.src}
+                  className={`w-8 h-8 rounded-full border-2 border-void overflow-hidden shrink-0 ${i > 0 ? "-ml-2.5" : ""}`}
                 >
-                  {initials}
+                  <img
+                    src={avatar.src}
+                    alt={avatar.alt}
+                    width={32}
+                    height={32}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
                 </div>
               ))}
             </div>
