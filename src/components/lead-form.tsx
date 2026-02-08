@@ -5,6 +5,15 @@ import { COUNTRIES } from "@/lib/countries";
 import { useGeo } from "@/hooks/use-geo";
 import { useUtm } from "@/hooks/use-utm";
 
+/** Convert ISO 3166-1 alpha-2 code to flag emoji via Regional Indicator Symbols */
+function countryFlag(code: string): string {
+  return code
+    .toUpperCase()
+    .split("")
+    .map((c) => String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65))
+    .join("");
+}
+
 const EXPERIENCE_OPTIONS = [
   "Student",
   "Working Professional",
@@ -397,10 +406,18 @@ export default function LeadForm() {
             )}
           </div>
 
-          {/* Phone with country code */}
+          {/* Phone with country code — unified container */}
           <div style={{ animationDelay: "180ms" }} className="animate-[fade-in_0.4s_ease-out_both]">
-            <div className="flex gap-2">
-              {/* Custom dial code dropdown */}
+            <div
+              className={`flex items-center bg-slate-card border rounded-lg transition-[color,border-color,box-shadow] ${
+                fieldErrors.phone
+                  ? "border-red-400/50"
+                  : dialCodeOpen
+                    ? "border-lime/30 shadow-[0_0_8px_rgba(196,242,73,0.1)]"
+                    : "border-white/10"
+              } focus-within:border-lime/40 focus-within:ring-1 focus-within:ring-lime/40 focus-within:shadow-[0_0_8px_rgba(196,242,73,0.1)]`}
+            >
+              {/* Dial code dropdown */}
               <div ref={dialCodeRef} className={`relative shrink-0 ${dialCodeOpen ? "z-[70]" : ""}`}>
                 <label htmlFor="dial-code-btn" className="sr-only">
                   Country calling code
@@ -411,15 +428,16 @@ export default function LeadForm() {
                   onClick={() => setDialCodeOpen(!dialCodeOpen)}
                   aria-expanded={dialCodeOpen}
                   aria-haspopup="listbox"
-                  className={`${selectClasses} w-28 text-left flex items-center justify-between cursor-pointer ${dialCodeOpen ? "border-lime/30" : ""}`}
+                  className="flex items-center gap-1.5 pl-3 pr-2 py-3 cursor-pointer text-white bg-transparent border-none outline-none"
                 >
-                  <span className="text-sm">{dialCode} {countryCode || "IN"}</span>
+                  <span className="text-base leading-none">{countryFlag(countryCode || "IN")}</span>
+                  <span className="text-sm">{dialCode}</span>
                   <svg
-                    className={`w-4 h-4 text-secondary transition-transform ${dialCodeOpen ? "rotate-180" : ""}`}
+                    className={`w-3.5 h-3.5 text-secondary/60 transition-transform ${dialCodeOpen ? "rotate-180" : ""}`}
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     aria-hidden="true"
@@ -432,7 +450,7 @@ export default function LeadForm() {
                   <div
                     role="listbox"
                     aria-label="Country calling code options"
-                    className="absolute z-[70] left-0 mt-1 w-56 max-h-[min(15rem,40vh)] overflow-y-auto bg-slate-card border border-white/10 rounded-lg py-1 shadow-[0_8px_30px_rgba(0,0,0,0.5)] dropdown-scroll [touch-action:pan-y]"
+                    className="absolute z-[70] left-0 mt-1 w-64 max-h-[min(15rem,40vh)] overflow-y-auto bg-slate-card border border-white/10 rounded-lg py-1 shadow-[0_8px_30px_rgba(0,0,0,0.5)] dropdown-scroll [touch-action:pan-y]"
                   >
                     {COUNTRIES.map((c) => (
                       <button
@@ -448,6 +466,7 @@ export default function LeadForm() {
                           dialCode === c.dialCode ? "text-lime" : "text-white"
                         }`}
                       >
+                        <span className="mr-2">{countryFlag(c.code)}</span>
                         {c.name} ({c.dialCode})
                       </button>
                     ))}
@@ -455,6 +474,10 @@ export default function LeadForm() {
                 )}
               </div>
 
+              {/* Vertical divider */}
+              <div className="w-px h-5 bg-white/10 shrink-0" />
+
+              {/* Phone input */}
               <div className="flex-1 relative">
                 <label htmlFor="phone" className="sr-only">
                   Phone number
@@ -467,7 +490,9 @@ export default function LeadForm() {
                   onChange={(e) => setPhone(e.target.value)}
                   aria-describedby="phone-error"
                   aria-invalid={!!fieldErrors.phone}
-                  className={`${inputClasses} ${fieldErrors.phone ? "border-red-400/50" : ""} ${phone.trim() && isFieldValid("phone") ? "pr-10" : ""}`}
+                  className={`w-full bg-transparent border-none rounded-r-lg px-3 py-3 text-white placeholder:text-secondary/60 focus:outline-none ${
+                    phone.trim() && isFieldValid("phone") ? "pr-10" : ""
+                  }`}
                 />
                 {phone.trim() && isFieldValid("phone") && validCheckmark}
               </div>
