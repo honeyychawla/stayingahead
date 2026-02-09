@@ -45,7 +45,7 @@ export default function HeroSection() {
           <p className="text-white text-sm font-medium leading-tight">
             Vaibhav Sisinty
           </p>
-          <p className="text-secondary text-xs">Founder, Staying Ahead</p>
+          <p className="text-secondary text-xs">Founder, GrowthSchool</p>
         </div>
       </div>
 
